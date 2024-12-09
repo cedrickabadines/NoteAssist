@@ -216,6 +216,7 @@ function renderTemplates() {
 
         if (template.name === "Default") {
             deleteBtn.disabled = true; // Disable delete for default template
+            templateNameInput.disabled = true; // Disable edit for default name template
         }
 
         
