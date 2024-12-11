@@ -24,21 +24,11 @@ notepad.addEventListener("input", autosaveNote);
 
 // Check if there is any saved note in localStorage when the page loads
 window.addEventListener("load", loadAutosaveNote);
-let autosaveInterval = setInterval(autosaveNote, 2000); // Autosave every 5 seconds
+let autosaveInterval = setInterval(autosaveNote, 2000); // Autosave every 2 seconds
 
 // Functions
 function loadDefaultTemplate() {
     notepad.value = templates[defaultTemplateIndex].content || "";  // Load content of the default template (empty if not set)
-}
-
-// Function to check if a template with the name "Default" exists
-function checkIfDefaultExists() {
-    // If "Default" template exists, disable the template name input field
-    if (templates.some(template => template.name === "Default")) {
-        templateNameInput.disabled = true;  // Disable input field
-    } else {
-        templateNameInput.disabled = false;  // Enable input field
-    }
 }
 
 function clearNotepad() {
@@ -154,6 +144,7 @@ function showTemplateEditor() {
     templateNameInput.value = "";
     templateContentInput.value = "";
     editingTemplateIndex = null;
+    templateNameInput.disabled = false;  // Always enable the input when creating a new template
     templateEditor.classList.remove("hidden");
 }
 
@@ -162,9 +153,15 @@ function saveTemplate() {
     const templateContent = templateContentInput.value;
 
     // Prevent creation of "Default" template
-    if (templateName.trim() === "Default") {
+    if (templateName.trim() === "Default" && editingTemplateIndex === null) {
         alert("A template named 'Default' already exists. You cannot create another one.");
         return;  // Prevent saving this template
+    }
+
+    // Prevent changing any template name to "Default"
+    if (templateName.trim() === "Default" && editingTemplateIndex !== null && templates[editingTemplateIndex].name !== "Default") {
+        alert("You cannot change the name of this template to 'Default'.");
+        return;  // Prevent saving this template with the name 'Default'
     }
 
     // Check if we are creating a new template and not editing
@@ -192,7 +189,6 @@ function saveTemplate() {
         alert("Both name and content are required.");
     }
 }
-
 
 
 
@@ -246,8 +242,6 @@ function renderTemplates() {
     });
 }
 
-
-
 function editTemplate(index) {
     let template = templates[index];
     templateNameInput.value = template.name;
@@ -264,7 +258,6 @@ function editTemplate(index) {
 
     templateEditor.classList.remove("hidden");
 }
-
 
 function deleteTemplate(index) {
     if (templates[index].name === "Default") {
@@ -293,7 +286,6 @@ function deleteTemplate(index) {
     renderTemplates();
 }
 
-
 function setAsDefault(index) {
     defaultTemplateIndex = index;
     localStorage.setItem("defaultTemplateIndex", defaultTemplateIndex);
@@ -316,7 +308,6 @@ function closeAbout() {
     document.getElementById("aboutPopup").classList.add("hidden");
 }
 
-// Initialize the template list on page load
 // Initialize the template list on page load
 window.addEventListener("load", () => {
     renderTemplates();  // Initial render of templates
