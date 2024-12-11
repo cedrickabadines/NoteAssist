@@ -31,6 +31,16 @@ function loadDefaultTemplate() {
     notepad.value = templates[defaultTemplateIndex].content || "";  // Load content of the default template (empty if not set)
 }
 
+// Function to check if a template with the name "Default" exists
+function checkIfDefaultExists() {
+    // If "Default" template exists, disable the template name input field
+    if (templates.some(template => template.name === "Default")) {
+        templateNameInput.disabled = true;  // Disable input field
+    } else {
+        templateNameInput.disabled = false;  // Enable input field
+    }
+}
+
 function clearNotepad() {
     notepad.value = "";
 }
@@ -150,7 +160,13 @@ function showTemplateEditor() {
 function saveTemplate() {
     const templateName = templateNameInput.value;
     const templateContent = templateContentInput.value;
-    
+
+    // Prevent creation of "Default" template
+    if (templateName.trim() === "Default") {
+        alert("A template named 'Default' already exists. You cannot create another one.");
+        return;  // Prevent saving this template
+    }
+
     // Check if we are creating a new template and not editing
     if (editingTemplateIndex === null) {
         // Check if we have reached the maximum number of templates (5 including default)
@@ -176,6 +192,8 @@ function saveTemplate() {
         alert("Both name and content are required.");
     }
 }
+
+
 
 
 function cancelTemplate() {
@@ -215,11 +233,9 @@ function renderTemplates() {
         makeDefaultBtn.onclick = () => setAsDefault(index);
 
         if (template.name === "Default") {
-            deleteBtn.disabled = true; // Disable delete for default template
-            templateNameInput.disabled = true; // Disable edit for default name template
+            deleteBtn.style.display = 'none'; // Disable delete for default template
         }
 
-        
         buttonsDiv.appendChild(makeDefaultBtn);
         buttonsDiv.appendChild(editBtn);
         buttonsDiv.appendChild(deleteBtn);
@@ -230,12 +246,25 @@ function renderTemplates() {
     });
 }
 
+
+
 function editTemplate(index) {
-    templateNameInput.value = templates[index].name;
-    templateContentInput.value = templates[index].content;
-    editingTemplateIndex = index;
+    let template = templates[index];
+    templateNameInput.value = template.name;
+    templateContentInput.value = template.content;
+
+    editingTemplateIndex = index; // Set the editing template index
+    
+    // Enable the templateNameInput for editing templates other than "Default"
+    if (template.name === "Default") {
+        templateNameInput.disabled = true;  // Disable input if editing the "Default" template
+    } else {
+        templateNameInput.disabled = false; // Enable input for other templates
+    }
+
     templateEditor.classList.remove("hidden");
 }
+
 
 function deleteTemplate(index) {
     if (templates[index].name === "Default") {
@@ -288,4 +317,8 @@ function closeAbout() {
 }
 
 // Initialize the template list on page load
-renderTemplates();
+// Initialize the template list on page load
+window.addEventListener("load", () => {
+    renderTemplates();  // Initial render of templates
+    checkIfDefaultExists();  // Check if "Default" exists and disable input if necessary
+});
